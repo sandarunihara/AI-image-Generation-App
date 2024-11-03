@@ -35,9 +35,43 @@ const CreatePost = () => {
     })
   }
   
-  const generateImg=()=>{
+  const generateImg = async () => {
+    if (form.prompt) {
+        try {
+            setGeneratingImg(true);
+            const response = await fetch('http://localhost:8080/api/v1/dalle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: form.prompt }),
+            });
 
-  }
+            // Check if the response is okay
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+
+            const data = await response.json();
+
+            // Check if the photo data exists in the response
+            if (data.photo) {
+                setForm({ ...form, photo: `data:image/jpeg;base64,${data.photo}` });
+            } else {
+                alert('No image generated. Please try again.');
+            }
+        } catch (error) {
+            alert("Error occurred while generating image: " + error.message);
+        } finally {
+            setGeneratingImg(false);
+        }
+    } else {
+        alert('Please enter a prompt to generate an image');
+    }
+};
+
+
+
 
 
   return (
